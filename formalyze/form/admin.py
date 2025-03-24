@@ -6,7 +6,7 @@ from .models import User, HealthCare, Form, FormResponse
 
 class CustomUserAdmin(UserAdmin):
     model = User
-    list_display = ('email', 'username', 'role', 'is_staff', 'is_active')
+    list_display = ('email', 'username',  'is_staff', 'is_active')
     fieldsets = UserAdmin.fieldsets + (
         ('Custom Fields', {'fields': ('role',)}),
     )
