@@ -35,4 +35,14 @@ class HealthCare(models.Model):
     def __str__(self):
         return self.name
 
+
+class Form(models.Model):
+    title = models.CharField(max_length=255)  # Form Title
+    description = models.TextField(blank=True)  # Optional Description
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    fields = models.JSONField()  # Store form structure dynamically
+    unique_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    def get_form_link(self):
+        return f"{settings.FRONTEND_URL}/form/{self.unique_token}/"
     
