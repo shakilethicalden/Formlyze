@@ -6,11 +6,7 @@ from django.conf import settings
 
 
 
-form_type=[
-    ('appointment', 'Appointment'),
-    ('referral', 'Referral'),
-    ('employment', 'Employment')
-]
+
 
 class User(AbstractUser):
     username=models.CharField(max_length=20,unique=True)
@@ -28,6 +24,7 @@ class User(AbstractUser):
     
     
 class HealthCare(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
     name=models.CharField(max_length=100)
     address=models.CharField(max_length=200)
     phone=models.CharField(max_length=15)
@@ -38,11 +35,12 @@ class HealthCare(models.Model):
 
 
 class Form(models.Model):
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
     description=models.TextField()
     image=models.ImageField(upload_to='images/')
     fields=models.JSONField() # it will be store data dynamically 
-    form_type=models.CharField(max_length=20,choices=form_type)
+    is_active=models.BooleanField(default=True)
     created_by=models.ForeignKey(User, on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
