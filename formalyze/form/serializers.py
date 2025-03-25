@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import HealthCare
+from .models import Form, FormResponse
 
-class HealthCareSerializer(serializers.Serializer):
+
+class FormSerializer(serializers.ModelSerializer):
     class Meta:
-        model= HealthCare
+        model = Form
         fields = '__all__'
+        
+class FormResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormResponse
+        fields = '__all__'
+        
+
+
         
 
 

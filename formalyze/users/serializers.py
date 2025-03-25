@@ -1,45 +1,25 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import CustomUser
+from .models import UserProfile
 
-
-User = get_user_model()
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'email']  # Added address and phone fields
-        
-
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
-        model = CustomUser
-        fields = ['username', 'email', 'password', 'password2']  # Added image field
-
-    def validate(self, data):
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError("Passwords must match.")
-        return data
+        model = UserProfile
+        fields = ['username', 'email', 'password', 'healthCareName', 'address', 'phone']
 
     def create(self, validated_data):
-    
-
-        # Create new user
-        user = CustomUser(
-            username=validated_data['username'],
-            email=validated_data['email'], 
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+        username = validated_data.pop('username')
+        email = validated_data.pop('email')
+        password = validated_data.pop('password')
+        
+        #create user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user_profile = UserProfile.objects.create(user=user, username=username, email=email, **validated_data)
+        return user_profile
 
 
-
-
-
-class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
