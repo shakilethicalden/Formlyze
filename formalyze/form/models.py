@@ -19,6 +19,8 @@ class Form(models.Model):
     """ generate unique token for form we will use it to make unique link"""
     unique_token=models.UUIDField(default=uuid.uuid4, unique=True, editable=False) 
     
+    def get_form_link(self):
+        return f"{settings.FRONTEND_URL}/{self.unique_token}"
     
     def __str__(self):
         return self.title

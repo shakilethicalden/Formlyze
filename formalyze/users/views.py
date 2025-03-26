@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status,viewsets
@@ -19,7 +22,20 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            user=serializer.save()
+            
+            subject='Registration Confirmation'
+            recipient_email=user.email
+            sender_email=settings.EMAIL_HOST_USER
+            
+            html_content= render_to_string("register.html",{
+                'user':user,
+            })
+            
+            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+            
             return Response({
                 'success': True,
                 "message": "User registered successfully"}, status=status.HTTP_201_CREATED)

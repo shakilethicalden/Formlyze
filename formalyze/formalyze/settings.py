@@ -36,10 +36,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'corsheaders',
     # local_apps
     'form',
     'users',
 ]
+
+
+FRONTEND_URL = 'http://127.0.0.1:800/api/form'
 
 
 REST_FRAMEWORK = {
@@ -49,8 +53,31 @@ REST_FRAMEWORK = {
 }
 
 
+# setup cors
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500"
+
+]
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization', 
+    'x-custom-header', 
+]
+
+
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', #cors midddleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

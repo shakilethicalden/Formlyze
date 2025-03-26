@@ -1,4 +1,5 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
+from django.http import JsonResponse,Http404
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -15,13 +16,19 @@ class FormView(viewsets.ModelViewSet):
     queryset=Form.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'created_by']
- 
     
     
-
+    def create(self, request, *args, **kwargs):
+        serializer= self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            form=serializer.save()            
             
-    
-    
+            return Response({
+                'success': True,
+                'form_link': form.get_form_link(),
+                'message': 'Form created successfully', }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+           
     
 class FormResponseView(viewsets.ModelViewSet):
     serializer_class=FormResponseSerializer
@@ -56,3 +63,24 @@ class FormResponseView(viewsets.ModelViewSet):
 
 
 
+def form_details(request,unique_token):
+    try:
+        form=get_object_or_404(Form,unique_token=unique_token)
+    except Form.DoesNotExist:
+        raise Http404("Form does not exist")
+    
+    
+    fields=form.fields
+    # print(fields)
+    
+    return render(request, 'form_details.html', {'form': form, 'fields': fields})
+        
+        
+    
+    # form_data= {
+    #     'title': form.title,
+    #     'description': form.description,
+    #     'fields': form.fields
+    # }
+    
+    # return JsonResponse(form_data)
