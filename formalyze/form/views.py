@@ -27,6 +27,8 @@ class FormResponseView(viewsets.ModelViewSet):
     serializer_class=FormResponseSerializer
     queryset=FormResponse.objects.all()
     http_method_names=['get','post']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['form', 'responder_email']
     
     
     #inboke create function for sending mail 
