@@ -6,17 +6,14 @@ from users.models import User
 # Create your models here.
 
     
-    
-
-
 
 class Form(models.Model):
+    created_by=models.ForeignKey(User, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
     description=models.TextField()
     image=models.ImageField(upload_to='images/')
     fields=models.JSONField() # it will be store data dynamically 
     is_active=models.BooleanField(default=True)
-    created_by=models.ForeignKey(User, on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     """ generate unique token for form we will use it to make unique link"""
@@ -29,6 +26,7 @@ class Form(models.Model):
 
 class FormResponse(models.Model):
     form=models.ForeignKey(Form, on_delete=models.CASCADE)
+    responder_email=models.EmailField(blank=True,null=True)
     response_data=models.JSONField() #dynamically store data of submission
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
