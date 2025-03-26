@@ -3,6 +3,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import FormSerializer,FormResponseSerializer
 from rest_framework import viewsets,generics,status
 from .models import Form, FormResponse
@@ -12,6 +13,8 @@ from .models import Form, FormResponse
 class FormView(viewsets.ModelViewSet):
     serializer_class=FormSerializer
     queryset=Form.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'created_by']
  
     
     

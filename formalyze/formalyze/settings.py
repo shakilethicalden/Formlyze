@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # third_party_apps
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     # local_apps
     'form',
     'users',
