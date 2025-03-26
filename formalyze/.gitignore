@@ -51,3 +51,6 @@ yarn.lock
 # Celery and background tasks
 celerybeat-schedule
 celerybeat.pid
+
+
+images/
