@@ -1,5 +1,6 @@
 import environ
-
+from dotenv import load_dotenv
+import os
 
 env = environ.Env()
 environ.Env.read_env()
@@ -33,15 +34,25 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # third_party_apps
+    'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',  
+    'allauth.socialaccount.providers.google',  # Google login provider
+    'dj_rest_auth.registration',
     'django_filters',
     'corsheaders',
+    
     # local_apps
     'form',
     'users',
+    'google_login',
 ]
 
+
+SITE_ID = 1
 
 FRONTEND_URL = 'http://127.0.0.1:800/api/form'
 
@@ -49,8 +60,10 @@ FRONTEND_URL = 'http://127.0.0.1:800/api/form'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
 
 
 # setup cors
@@ -78,6 +91,7 @@ CORS_ALLOW_HEADERS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', #cors midddleware
+     "allauth.account.middleware.AccountMiddleware", #allauth middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,6 +100,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+#setup allauth disable email verification
+
+ACCOUNT_AUTHENTICATION_METHOD = "email"  
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+
 
 ROOT_URLCONF = 'formalyze.urls'
 
@@ -169,4 +192,29 @@ EMAIL_HOST_USER = env("EMAIL")
 EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD")
 
 
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+GOOGLE_OAUTH_CALLBACK_URL = os.getenv("GOOGLE_OAUTH_CALLBACK_URL")
 
+
+
+# django-allauth (social)
+# Authenticate if local account with this email address already exists
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+# Connect local account and social account if local account with that email address already exists
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APPS": [
+            {
+                "client_id": GOOGLE_OAUTH_CLIENT_ID,
+                "secret": GOOGLE_OAUTH_CLIENT_SECRET,
+                "key": "",
+            },
+        ],
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
