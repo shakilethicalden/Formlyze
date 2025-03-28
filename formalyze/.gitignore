@@ -15,7 +15,8 @@ Pipfile.lock
 *.log
 db.sqlite3
 *.sqlite3
-media/
+media
+media/images
 staticfiles/
 *.pyc
 

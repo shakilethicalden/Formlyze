@@ -8,6 +8,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import FormSerializer,FormResponseSerializer
 from rest_framework import viewsets,generics,status
 from .models import Form, FormResponse
+from django.contrib import messages
+
 
 # Create your views here.
 
@@ -63,24 +65,48 @@ class FormResponseView(viewsets.ModelViewSet):
 
 
 
-def form_details(request,unique_token):
-    try:
-        form=get_object_or_404(Form,unique_token=unique_token)
-    except Form.DoesNotExist:
-        raise Http404("Form does not exist")
+def form_details(request, unique_token):
+    form = get_object_or_404(Form, unique_token=unique_token)
+    fields = form.fields  
+    print("image", form.image
+          )
+
+    if request.method == 'POST':
+        response_data = {}
+        
     
-    
-    fields=form.fields
-    # print(fields)
-    
+        for field in fields:
+            field_name = field['name']
+            response_data[field_name] = request.POST.get(field_name)
+
+   
+        responder_email = request.POST.get('email', '')  
+
+        form_response = FormResponse(
+            form=form,
+            responder_email=responder_email,
+            response_data=response_data
+        )
+        form_response.save()
+
+        # Send confirmation email
+        if responder_email: 
+            subject= "From Submission Confirmation"
+            recipient_email=responder_email
+            sender_email=settings.EMAIL_HOST_USER
+            
+            html_content= render_to_string("form_response.html",{
+                'responder_email':recipient_email,
+            })
+            
+            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+        messages.success(request, "Your response has been submitted successfully! A confirmation email has been sent.")
+        return redirect('form_details', unique_token=unique_token)
+
     return render(request, 'form_details.html', {'form': form, 'fields': fields})
         
         
     
-    # form_data= {
-    #     'title': form.title,
-    #     'description': form.description,
-    #     'fields': form.fields
-    # }
-    
-    # return JsonResponse(form_data)
