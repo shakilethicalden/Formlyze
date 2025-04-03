@@ -57,3 +57,5 @@ celerybeat.pid
 images/
 # Ignore migration files
 */migrations/
+
+*.pdf

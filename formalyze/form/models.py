@@ -11,7 +11,7 @@ class Form(models.Model):
     created_by=models.ForeignKey(User, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
     description=models.TextField()
-    image=models.ImageField(upload_to='images/')
+    image=models.ImageField(upload_to='images/',blank=True,null=True)
     fields=models.JSONField() # it will be store data dynamically 
     is_active=models.BooleanField(default=True)
     created_at=models.DateTimeField(auto_now_add=True)
