@@ -5,9 +5,11 @@ from .models import Form, FormResponse
 
 class FormSerializer(serializers.ModelSerializer):
     creator_name=serializers.SerializerMethodField() #we can retrieve username
+    form_link = serializers.SerializerMethodField()
     class Meta:
         model = Form
         fields = '__all__'
+
         
     def get_form_link(self,obj):
         return obj.get_form_link()
