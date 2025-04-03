@@ -49,6 +49,11 @@ INSTALLED_APPS = [
     'form',
     'users',
     'google_login',
+    
+    #swagger app
+    'drf_yasg',
+    'rest_framework_swagger',
+    
 ]
 
 
