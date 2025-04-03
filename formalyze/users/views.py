@@ -10,11 +10,12 @@ from rest_framework.authtoken.models import Token
 from .serializers import RegisterSerializer, LoginSerializer,UserSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from .models import UserProfile
 
 
 class UserView(viewsets.ModelViewSet):
     serializer_class=UserSerializer
-    queryset=User.objects.all()
+    queryset=UserProfile.objects.all()
 
 
 
