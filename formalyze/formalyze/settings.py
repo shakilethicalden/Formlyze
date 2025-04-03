@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-FRONTEND_URL = 'http://127.0.0.1:800/api/form'
+FRONTEND_URL = 'http://127.0.0.1:8000/api/form'
 
 
 REST_FRAMEWORK = {
