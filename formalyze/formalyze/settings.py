@@ -65,7 +65,6 @@ FRONTEND_URL = 'http://127.0.0.1:8000/api/form'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
 
@@ -96,7 +95,7 @@ CORS_ALLOW_HEADERS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', #cors midddleware
-     "allauth.account.middleware.AccountMiddleware", #allauth middleware
+    "allauth.account.middleware.AccountMiddleware", #allauth middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

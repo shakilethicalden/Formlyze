@@ -1,6 +1,7 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+from rest_framework.authtoken.models import Token
 from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
@@ -9,14 +10,15 @@ from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 import requests
-import jwt
+from django.http import JsonResponse
+from django.http import HttpResponseRedirect
 
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    callback_url = settings.GOOGLE_OAUTH_CALLBACK_URL
-    client_class = OAuth2Client
+
+# class GoogleLogin(SocialLoginView):
+#     adapter_class = GoogleOAuth2Adapter
+#     callback_url = settings.GOOGLE_OAUTH_CALLBACK_URL
+#     client_class = OAuth2Client
 
 class GoogleLoginCallback(APIView):
     def get(self, request, *args, **kwargs):
@@ -40,42 +42,56 @@ class GoogleLoginCallback(APIView):
         tokens = response.json()
         id_token = tokens.get("id_token")
 
-        # Decode ID Token
-        try:
-            decoded_token = jwt.decode(id_token, options={"verify_signature": False})
-        except jwt.ExpiredSignatureError:
-            return Response({"error": "ID token has expired"}, status=status.HTTP_400_BAD_REQUEST)
-        except jwt.InvalidTokenError:
-            return Response({"error": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Extract user info
-        email = decoded_token.get("email")
-        first_name = decoded_token.get("given_name", "")
-        last_name = decoded_token.get("family_name", "")
+        # Extract user info from id_token (without decoding)
+        user_info_url = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + id_token
+        user_info_response = requests.get(user_info_url)
+        if user_info_response.status_code != 200:
+            return Response({"error": "Failed to get user info from Google"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_info = user_info_response.json()
+        email = user_info.get("email")
+        first_name = user_info.get("given_name", "")
+        last_name = user_info.get("family_name", "")
+        
         if not email:
             return Response({"error": "No email found in ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user, _ = User.objects.get_or_create(username=email, defaults={"email": email, "first_name": first_name, "last_name": last_name}) # user get and create
+        user, _ = User.objects.get_or_create(username=email, defaults={"email": email, "first_name": first_name, "last_name": last_name})
 
-        # Generate JWT token
-        refresh = RefreshToken.for_user(user)
+        # Create Token for user
+        token, created = Token.objects.get_or_create(user=user)
 
-        return Response({
-            "refresh_token": str(refresh),
-            "access_token": str(refresh.access_token),
-            "user": {"id": user.id, "email": user.email, "first_name": user.first_name, "last_name": user.last_name},
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "success": True,
+                "user_id": user.id,
+                "message": "Login successful",
+                "token": token.key
+            }
+        )
+        
+        #here we make redirect url
+        # redirect_url = f"http://127.0.0.1:5500/frontend/index.html?token={token.key}&user_id={user.id}"
+        
+        #we return response the redirect url to frontend but now for testing we return response for checking
 
+        # return HttpResponseRedirect(redirect_url)
+        
+        
+        
+        
+#this function we use for return response to frontend credentials       
+def google_oauth_config(request):
+    return JsonResponse({
+        'google_client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+        'google_callback_uri': settings.GOOGLE_OAUTH_CALLBACK_URL
+    })
+
+
+
+
+#we testing google login for use with template
 class LoginPage(View):
     def get(self, request, *args, **kwargs):
         return render(request, "login.html", {"google_callback_uri": settings.GOOGLE_OAUTH_CALLBACK_URL, "google_client_id": settings.GOOGLE_OAUTH_CLIENT_ID})
 
-
-class LogoutView(APIView):
-    def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            user = request.user
-            logout(request)
-            return Response({"message": f"Successfully logged out, {user.username}."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"message": "No user is currently logged in."}, status=status.HTTP_400_BAD_REQUEST)
