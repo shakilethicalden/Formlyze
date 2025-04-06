@@ -23,23 +23,46 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user=serializer.save()
-            
-            subject='Registration Confirmation'
-            recipient_email=user.email
-            sender_email=settings.EMAIL_HOST_USER
-            
-            html_content= render_to_string("register.html",{
-                'user':user,
-            })
-            
-            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
-            email.attach_alternative(html_content, "text/html")
-            email.send()
-            
-            return Response({
-                'success': True,
-                "message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+            try:
+                user = serializer.save()
+                try:
+                    subject = 'Registration Confirmation'
+                    recipient_email = user.email
+                    
+                    sender_email = settings.EMAIL_HOST_USER
+                    
+                    html_content = render_to_string("register.html", {
+                        'user': user,
+                    })
+                    
+                    email = EmailMultiAlternatives(
+                        subject, 
+                        "", 
+                        sender_email, 
+                        [recipient_email]
+                    )
+                    email.attach_alternative(html_content, "text/html")
+                    email.send()
+                    
+                    return Response({
+                        'success': True,
+                        "message": "User registered successfully"
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except Exception as e:
+                    return Response({
+                        'success': True,
+                        "message": "User registered but confirmation email failed",
+                        "error": str(e)
+                    }, status=status.HTTP_201_CREATED)
+                    
+            except Exception as e:
+                return Response({
+                    'success': False,
+                    "message": "User registration failed",
+                    "error": str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
