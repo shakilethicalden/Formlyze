@@ -20,7 +20,7 @@ class Form(models.Model):
     unique_token=models.UUIDField(default=uuid.uuid4, unique=True, editable=False) 
     
     def get_form_link(self):
-        return f"{settings.FRONTEND_URL}/{self.unique_token}"
+        return f"{settings.FRONTEND_URL}/api/form/{self.unique_token}"
     
     def __str__(self):
         return self.title
