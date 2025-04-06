@@ -61,21 +61,21 @@ class GoogleLoginCallback(APIView):
         # Create Token for user
         token, created = Token.objects.get_or_create(user=user)
 
-        return Response(
-            {
-                "success": True,
-                "user_id": user.id,
-                "message": "Login successful",
-                "token": token.key
-            }
-        )
+        # return Response(
+        #     {
+        #         "success": True,
+        #         "user_id": user.id,
+        #         "message": "Login successful",
+        #         "token": token.key
+        #     }
+        # )
         
         #here we make redirect url
-        # redirect_url = f"http://127.0.0.1:5500/frontend/index.html?token={token.key}&user_id={user.id}"
+        redirect_url = f"https://formlyze.vercel.app/?token={token.key}&user_id={user.id}"
         
         #we return response the redirect url to frontend but now for testing we return response for checking
 
-        # return HttpResponseRedirect(redirect_url)
+        return HttpResponseRedirect(redirect_url)
         
         
         

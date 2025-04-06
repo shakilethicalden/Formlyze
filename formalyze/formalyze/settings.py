@@ -20,7 +20,7 @@ SECRET_KEY = 'django-insecure-cc!u#+^om+rrla$mu40_%0!6zw(q&th-=z)-ts-!k29+riis)z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', #whitenoise app
     'django.contrib.staticfiles',
     
     # third_party_apps
@@ -59,7 +60,7 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-FRONTEND_URL = 'http://127.0.0.1:8000/api/form'
+FRONTEND_URL = 'https://formlyze.mrshakil.com'
 
 
 REST_FRAMEWORK = {
@@ -74,7 +75,8 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500"
+    "http://localhost:3000",
+    "https://formlyze.vercel.app"
 
 ]
 CORS_ALLOW_METHODS = [
@@ -91,6 +93,12 @@ CORS_ALLOW_HEADERS = [
     'x-custom-header', 
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",              
+    "https://formlyze.vercel.app",     
+]
+
+
 
 
 MIDDLEWARE = [
@@ -98,6 +106,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware", #allauth middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', #whitenoise middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -182,7 +191,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_ROOT = BASE_DIR / 'staticfiles/'
+MEDIA_ROOT = BASE_DIR / 'media/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 
 
 # Default primary key field type
