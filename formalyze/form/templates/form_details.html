@@ -12,10 +12,12 @@
 
     <div class="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden relative">
 
+        {% if form.image %}
         <div class="relative w-full h-40 bg-gray-300 bg-cover bg-center">
             <img src="http://localhost:8000/media/{{ form.image }}" alt="Image" class="w-full h-full object-center">
-
         </div>
+        {% endif %}
+        
 
         <!-- Form Content -->
         <div class="p-6">

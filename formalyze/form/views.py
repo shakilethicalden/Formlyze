@@ -1,5 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import JsonResponse,Http404
+from django.views import View
+from django.http import HttpResponseServerError
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -73,3 +75,45 @@ def form_details(request, unique_token):
         
         
     
+# def form_details(request, unique_token):
+#      form = get_object_or_404(Form, unique_token=unique_token)
+#      fields = form.fields  
+#      print("image", form.image
+#            )
+ 
+#      if request.method == 'POST':
+#          response_data = {}
+         
+     
+#          for field in fields:
+#              field_name = field['name']
+#              response_data[field_name] = request.POST.get(field_name)
+ 
+    
+#          responder_email = request.POST.get('email', '')  
+ 
+#          form_response = FormResponse(
+#              form=form,
+#              responder_email=responder_email,
+#              response_data=response_data
+#          )
+#          form_response.save()
+ 
+#          # Send confirmation email
+#          if responder_email: 
+#              subject= "From Submission Confirmation"
+#              recipient_email=responder_email
+#              sender_email=settings.EMAIL_HOST_USER
+             
+#              html_content= render_to_string("form_response.html",{
+#                  'responder_email':recipient_email,
+#              })
+             
+#              email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
+#              email.attach_alternative(html_content, "text/html")
+#              email.send()
+ 
+#          messages.success(request, "Your response has been submitted successfully! A confirmation email has been sent.")
+#          return redirect('form_details', unique_token=unique_token)
+ 
+#      return render(request, 'form_details.html', {'form': form, 'fields': fields})
