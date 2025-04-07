@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-FRONTEND_URL = 'https://formlyze.mrshakil.com'
+FRONTEND_URL = 'http://127.0.0.1:8000'
 
 
 REST_FRAMEWORK = {

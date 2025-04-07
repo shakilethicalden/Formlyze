@@ -1,10 +1,8 @@
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
+from  users.models import UserProfile
 from django.shortcuts import render
 from django.views import View
 from rest_framework import status
@@ -57,14 +55,16 @@ class GoogleLoginCallback(APIView):
             return Response({"error": "No email found in ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
         user, _ = User.objects.get_or_create(username=email, defaults={"email": email, "first_name": first_name, "last_name": last_name})
-
+        
+        # Create or get UserProfile
+        user_profile, _ = UserProfile.objects.get_or_create(user=user, defaults={"username": email, "email": email, "first_name": first_name, "last_name": last_name})
         # Create Token for user
         token, created = Token.objects.get_or_create(user=user)
 
         # return Response(
         #     {
         #         "success": True,
-        #         "user_id": user.id,
+        #         "user_id": user_profile.id,  # returning UserProfile's ID
         #         "message": "Login successful",
         #         "token": token.key
         #     }
@@ -73,7 +73,7 @@ class GoogleLoginCallback(APIView):
         #here we make redirect url
         redirect_url = f"https://formlyze.vercel.app/?token={token.key}&user_id={user.id}"
         
-        #we return response the redirect url to frontend but now for testing we return response for checking
+        # #we return response the redirect url to frontend but now for testing we return response for checking
 
         return HttpResponseRedirect(redirect_url)
         

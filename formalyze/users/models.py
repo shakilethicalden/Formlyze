@@ -7,7 +7,7 @@ class UserProfile(models.Model):
     email = models.EmailField(unique=True)
     healthCareName = models.CharField(max_length=100, blank=True, null=True)
     address = models.CharField(max_length=200, blank=True, null=True)
-    phone = models.CharField(max_length=15)
+    phone = models.CharField(max_length=15,blank=True,null=True)
     first_name = models.CharField(max_length=30, blank=True, null=True)  
     last_name = models.CharField(max_length=30, blank=True, null=True) 
 
