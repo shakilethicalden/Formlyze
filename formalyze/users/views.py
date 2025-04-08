@@ -77,31 +77,31 @@ class LoginView(APIView):
                 'error': 'Both username/email and password are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-
+ 
         if '@' in username_or_email:
+    
             try:
-                user = User.objects.get(email=username_or_email)
-                username = user.username
-            except User.DoesNotExist:
+                profile = UserProfile.objects.get(email=username_or_email)
+            except UserProfile.DoesNotExist:
                 return Response({'error': 'Invalid email', 'success': False},
                                 status=status.HTTP_401_UNAUTHORIZED)
         else:
-            username = username_or_email
-
-        user = authenticate(username=username, password=password)
-
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-
+   
             try:
-                profile = UserProfile.objects.get(user=user)
-                profile_id = profile.id
+                profile = UserProfile.objects.get(username=username_or_email)
             except UserProfile.DoesNotExist:
-                profile_id = None
+                return Response({'error': 'Invalid username', 'success': False},
+                                status=status.HTTP_401_UNAUTHORIZED)
 
+ 
+        user = profile.user
+        authenticated_user = authenticate(username=user.username, password=password)
+
+        if authenticated_user:
+            token, _ = Token.objects.get_or_create(user=authenticated_user)
             return Response({
                 'success': True,
-                'user_id': profile_id,
+                'user_id': profile.id,
                 'message': 'Login successful',
                 'token': token.key
             })

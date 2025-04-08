@@ -1,14 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser,Group,Permission
 import uuid
 from django.conf import settings
-from users.models import User
+from users.models import UserProfile
 # Create your models here.
 
     
 
 class Form(models.Model):
-    created_by=models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by=models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
     description=models.TextField()
     image=models.ImageField(upload_to='images/',blank=True,null=True)
