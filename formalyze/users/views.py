@@ -68,32 +68,46 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-            user = authenticate(username=username, password=password)
+        username_or_email = request.data.get('username')
+        password = request.data.get('password')
 
-            if user:
-                token, _ = Token.objects.get_or_create(user=user)
+        if not username_or_email or not password:
+            return Response({
+                'success': False,
+                'error': 'Both username/email and password are required.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-                try:
-                    profile = UserProfile.objects.get(user=user)
-                    profile_id = profile.id
-                except UserProfile.DoesNotExist:
-                    profile_id = None  # or handle it differently
 
-                return Response({
-                    'success': True,
-                    'user_id': profile_id,
-                    'message': 'Login successful',
-                    'token': token.key
-                })
+        if '@' in username_or_email:
+            try:
+                user = User.objects.get(email=username_or_email)
+                username = user.username
+            except User.DoesNotExist:
+                return Response({'error': 'Invalid email', 'success': False},
+                                status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            username = username_or_email
 
-            return Response({'error': 'Invalid credentials', 'success': False},
-                            status=status.HTTP_401_UNAUTHORIZED)
+        user = authenticate(username=username, password=password)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+
+            try:
+                profile = UserProfile.objects.get(user=user)
+                profile_id = profile.id
+            except UserProfile.DoesNotExist:
+                profile_id = None
+
+            return Response({
+                'success': True,
+                'user_id': profile_id,
+                'message': 'Login successful',
+                'token': token.key
+            })
+
+        return Response({'error': 'Invalid credentials', 'success': False},
+                        status=status.HTTP_401_UNAUTHORIZED)
 
 
 
