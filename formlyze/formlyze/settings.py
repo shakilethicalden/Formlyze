@@ -121,7 +121,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 
 
-ROOT_URLCONF = 'formalyze.urls'
+ROOT_URLCONF = 'formlyze.urls'
 
 TEMPLATES = [
     {
@@ -139,7 +139,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'formalyze.wsgi.application'
+WSGI_APPLICATION = 'formlyze.wsgi.application'
 
 
 # Database

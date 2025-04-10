@@ -21,7 +21,7 @@ class FormView(viewsets.ModelViewSet):
     queryset = Form.objects.all().order_by('-created_at')
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'created_by']
- 
+    # permission_classes=[IsAuthenticated]
     
     
     def create(self, request, *args, **kwargs):
@@ -73,7 +73,7 @@ def form_details(request, unique_token):
     form = get_object_or_404(Form, unique_token=unique_token)
     fields = form.fields  
 
-    return JsonResponse({'form_name': form.title, 'fields': fields}) #return json response just form name and fields
+    return JsonResponse({'id': form.id, 'form_name': form.title, 'fields': fields}) #return json response just form name and fields
         
         
     

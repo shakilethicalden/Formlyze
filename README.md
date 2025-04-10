@@ -291,8 +291,7 @@ Retrieve a list of all available forms.
       "label": "First Name",
       "placeholder": "Enter your first name",
       "required": true,
-      "max_length": 100
-    },
+      "max_length": 100,
     "is_active": true,
     "created_at": "2025-03-25T21:53:03.858475Z",
     "updated_at": "2025-03-25T21:53:03.858475Z",
