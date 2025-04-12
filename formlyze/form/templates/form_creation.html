@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Form Submission Confirmation</title>
+    <title>Form Creation Confirmation</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
         .container { background: white; padding: 20px; border-radius: 8px; }
@@ -12,11 +12,9 @@
 </head>
 <body>
     <div class="container">
-        <p class="header">Form Submission Successful</p>
-        <p class="message">Dear {{ responder_email }},</p>
+        <p class="header">Form Creation Successful</p>
+        <p class="message">Dear {{ username }},</p>
         <p class="message">Thank you for submitting the form. We have received your response.</p>
-        <p class="message">You can view your response by clicking the link below:</p>
-        <p class="message"><a href="{{ response_url }}">View Response</a></p>
         <p class="message">If you have any questions, feel free to contact us.</p>
         <p class="footer">Best Regards, <br> Formlyze Team</p>
     </div>

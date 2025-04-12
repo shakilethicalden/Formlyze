@@ -27,7 +27,23 @@ class FormView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer= self.get_serializer(data=request.data)
         if serializer.is_valid():
-            form=serializer.save()            
+            form=serializer.save()
+            
+            subject= "Form Creation Confirmation"
+            recipient_email=form.created_by.email
+            sender_email=settings.EMAIL_HOST_USER
+            
+            html_content= render_to_string("form_creation.html",{
+                'form':form,
+                'username':form.created_by.username
+                
+            })
+            
+            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+            
+                        
             
             return Response({
                 'success': True,
@@ -50,17 +66,23 @@ class FormResponseView(viewsets.ModelViewSet):
         if serializer.is_valid():
             data=serializer.save()
             
+            response_url=f"{settings.FRONTEND_URL}/api/form-response/{data.id}"
+            #send mail
             subject= "From Submission Confirmation"
             recipient_email=data.responder_email
             sender_email=settings.EMAIL_HOST_USER
             
             html_content= render_to_string("form_response.html",{
-                'responder_email':recipient_email,
+                'responder_email':recipient_email, 
+                'response_url':response_url
             })
             
             email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
             email.attach_alternative(html_content, "text/html")
             email.send()
+            
+            
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 

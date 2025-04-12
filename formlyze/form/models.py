@@ -19,7 +19,7 @@ class Form(models.Model):
     unique_token=models.UUIDField(default=uuid.uuid4, unique=True, editable=False) 
     
     def get_form_link(self):
-        return f"{settings.FRONTEND_URL}/api/form/{self.unique_token}"
+        return f"{settings.BACKEND_URL}/api/form/{self.unique_token}"
     
     def __str__(self):
         return self.title
@@ -29,6 +29,7 @@ class FormResponse(models.Model):
     form=models.ForeignKey(Form, on_delete=models.CASCADE)
     responder_email=models.EmailField(blank=True,null=True)
     response_data=models.JSONField() #dynamically store data of submission
+    
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     

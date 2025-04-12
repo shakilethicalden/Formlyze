@@ -58,7 +58,9 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-FRONTEND_URL = 'https://formlyze.mrshakil.com'
+FRONTEND_URL = 'https://formlyze.vercel.app'
+BACKEND_URL = 'https://formlyze.mrshakil.com'
+
 
 
 REST_FRAMEWORK = {
