@@ -66,7 +66,7 @@ class FormResponseView(viewsets.ModelViewSet):
         if serializer.is_valid():
             data=serializer.save()
             
-            response_url=f"{settings.FRONTEND_URL}/api/form-response/{data.id}"
+            response_url=f"{settings.FRONTEND_URL}/view-single-response/{data.id}"
             #send mail
             subject= "From Submission Confirmation"
             recipient_email=data.responder_email
