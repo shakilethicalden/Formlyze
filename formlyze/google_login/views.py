@@ -71,7 +71,8 @@ class GoogleLoginCallback(APIView):
         # )
         
         #here we make redirect url
-        redirect_url = f"https://formlyze.vercel.app/?token={token.key}&user_id={user_profile.id}"
+        redirect_url = f"{settings.FRONTEND_URL}/sign-in/?token={token.key}&user_id={user_profile.id}"
+        
         
         # #we return response the redirect url to frontend but now for testing we return response for checking
 
