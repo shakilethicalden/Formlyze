@@ -1,7 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from django.http import JsonResponse,Http404
-from django.views import View
-from django.http import HttpResponseServerError
+from django.http import JsonResponse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -12,6 +10,16 @@ from rest_framework import viewsets,generics,status
 from .models import Form, FormResponse
 from django.contrib import messages
 from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from rest_framework.response import Response
+
+def is_valid_email(email):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
 
 
 # Create your views here.
@@ -67,19 +75,42 @@ class FormResponseView(viewsets.ModelViewSet):
             data=serializer.save()
             
             response_url=f"{settings.FRONTEND_URL}/view-single-response/{data.id}"
-            #send mail
             subject= "From Submission Confirmation"
-            recipient_email=data.responder_email
+            creator_email=data.form.created_by.email
+            responder_email=data.responder_email
             sender_email=settings.EMAIL_HOST_USER
+            #send mail to creator
+            if is_valid_email(creator_email):
+                try:
+                    html_content= render_to_string("form_response_creator.html",{
+                        'username':data.form.created_by.username,
+                        'form_title':data.form.title, 
+                        'response_url':response_url
+                    })
+
+                    email= EmailMultiAlternatives(subject, "" , sender_email, [creator_email])
+                    email.attach_alternative(html_content, "text/html")
+                    email.send()
+                except Exception as e:
+                    return Response({"error": "Failed to send email to creator"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST)
             
-            html_content= render_to_string("form_response.html",{
-                'responder_email':recipient_email, 
-                'response_url':response_url
-            })
-            
-            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
-            email.attach_alternative(html_content, "text/html")
-            email.send()
+            #send mail to responder
+            if is_valid_email(responder_email):
+                try:
+                    html_content= render_to_string("form_response.html",{
+                        'responder_email':responder_email, 
+                        'response_url':response_url
+                    })
+
+                    email= EmailMultiAlternatives(subject, "" , sender_email, [responder_email])
+                    email.attach_alternative(html_content, "text/html")
+                    email.send()
+                except Exception as e:
+                    return Response({"error": "Failed to send email to responder"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST)
             
             
             
@@ -99,45 +130,3 @@ def form_details(request, unique_token):
         
         
     
-# def form_details(request, unique_token):
-#      form = get_object_or_404(Form, unique_token=unique_token)
-#      fields = form.fields  
-#      print("image", form.image
-#            )
- 
-#      if request.method == 'POST':
-#          response_data = {}
-         
-     
-#          for field in fields:
-#              field_name = field['name']
-#              response_data[field_name] = request.POST.get(field_name)
- 
-    
-#          responder_email = request.POST.get('email', '')  
- 
-#          form_response = FormResponse(
-#              form=form,
-#              responder_email=responder_email,
-#              response_data=response_data
-#          )
-#          form_response.save()
- 
-#          # Send confirmation email
-#          if responder_email: 
-#              subject= "From Submission Confirmation"
-#              recipient_email=responder_email
-#              sender_email=settings.EMAIL_HOST_USER
-             
-#              html_content= render_to_string("form_response.html",{
-#                  'responder_email':recipient_email,
-#              })
-             
-#              email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
-#              email.attach_alternative(html_content, "text/html")
-#              email.send()
- 
-#          messages.success(request, "Your response has been submitted successfully! A confirmation email has been sent.")
-#          return redirect('form_details', unique_token=unique_token)
- 
-#      return render(request, 'form_details.html', {'form': form, 'fields': fields})
