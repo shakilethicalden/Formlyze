@@ -9,7 +9,7 @@ from users.models import UserProfile
 class Form(models.Model):
     created_by=models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
-    description=models.TextField()
+    description=models.TextField(null=True, blank=True)
     image=models.ImageField(upload_to='images/',blank=True,null=True)
     fields=models.JSONField() # it will be store data dynamically 
     is_active=models.BooleanField(default=True)

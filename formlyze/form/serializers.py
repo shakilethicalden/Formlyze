@@ -18,11 +18,17 @@ class FormSerializer(serializers.ModelSerializer):
         return f"{obj.created_by.username}"
         
 class FormResponseSerializer(serializers.ModelSerializer):
+    form_title=serializers.SerializerMethodField()
+    form_description=serializers.SerializerMethodField()
     class Meta:
         model = FormResponse
         fields = '__all__'
         
-
+    def get_form_title(self,obj):
+        return f"{obj.form.title}"
+        
+    def get_form_description(self,obj):
+        return f"{obj.form.description}"
 
         
 
