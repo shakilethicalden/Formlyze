@@ -72,7 +72,7 @@ class GoogleLoginCallback(APIView):
         
         #here we make redirect url
         redirect_url = f"{settings.FRONTEND_URL}/sign-in/?token={token.key}&user_id={user_profile.id}"
-        
+        # print(redirect_url)
         
         # #we return response the redirect url to frontend but now for testing we return response for checking
 
