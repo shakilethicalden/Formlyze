@@ -141,7 +141,7 @@ class ExportFormResponsesExcel(APIView):
     def get(self, request, form_id):
         form_responses = FormResponse.objects.filter(form_id=form_id)
         form=Form.objects.get(id=form_id)
-        print(form_responses)
+        # print(form_responses)
         excel_file = generate_excel(form_responses)
 
         filename = f"{form.title}_responses.xlsx" #excel file save for this name
