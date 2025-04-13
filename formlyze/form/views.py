@@ -139,18 +139,32 @@ class ExportFormResponsesExcel(APIView):
 
 
     def get(self, request, form_id):
-        form_responses = FormResponse.objects.filter(form_id=form_id)
-        form=Form.objects.get(id=form_id)
-        # print(form_responses)
-        excel_file = generate_excel(form_responses)
+        try:
+            form_responses = FormResponse.objects.filter(form_id=form_id)
+            form = Form.objects.get(id=form_id)
+            # print(form_responses)
+            excel_file = generate_excel(form_responses)
 
-        filename = f"{form.title}_responses.xlsx" #excel file save for this name
-        response = FileResponse(
-            excel_file,
-            as_attachment=True,
-            filename=filename,
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        return response
+            filename = f"{form.title}_responses.xlsx" #excel file save for this name
+            response = FileResponse(
+                excel_file,
+                as_attachment=True,
+                filename=filename,
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            return response
+        except Form.DoesNotExist:
+            return Response({"error": "Something wrong maybe check your form id"}, status=status.HTTP_404_NOT_FOUND)
     
     
+
+
+class ExcelDownloadDetails(APIView):
+    
+    def get(self, request, form_id):
+        form = get_object_or_404(Form, id=form_id)
+        url=f"http://127.0.0.1:8000/api/form/export-responses/{form_id}/"
+        return Response({
+            "form_title": form.title,
+            'url': url})
+            
