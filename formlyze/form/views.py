@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import JsonResponse
+from rest_framework.views import APIView
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -13,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework.response import Response
+from django.http import FileResponse
+from .utils.export_excel import generate_excel
 
 def is_valid_email(email):
     try:
@@ -129,4 +132,25 @@ def form_details(request, unique_token):
     return JsonResponse({'id': form.id, 'form_name': form.title, 'fields': fields}) #return json response just form name and fields
         
         
+        
+        
+        
+class ExportFormResponsesExcel(APIView):
+
+
+    def get(self, request, form_id):
+        form_responses = FormResponse.objects.filter(form_id=form_id)
+        form=Form.objects.get(id=form_id)
+        print(form_responses)
+        excel_file = generate_excel(form_responses)
+
+        filename = f"{form.title}_responses.xlsx" #excel file save for this name
+        response = FileResponse(
+            excel_file,
+            as_attachment=True,
+            filename=filename,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        return response
+    
     
