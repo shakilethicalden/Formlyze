@@ -136,16 +136,23 @@ def form_details(request, unique_token):
         
         
 class ExportFormResponsesExcel(APIView):
-
-
     def get(self, request, form_id):
         try:
-            form_responses = FormResponse.objects.filter(form_id=form_id)
-            form = Form.objects.get(id=form_id)
-            # print(form_responses)
-            excel_file = generate_excel(form_responses)
+  
+            try:
+                form = Form.objects.get(id=form_id)
+            except Form.DoesNotExist:
+                return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            filename = f"{form.title}_responses.xlsx" #excel file save for this name
+            # Get form responses
+            form_responses = FormResponse.objects.filter(form_id=form_id)
+
+            # Generate the Excel file
+            excel_file = generate_excel(form_responses)
+            if not excel_file:
+                return Response({"error": "Failed to generate Excel file."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            filename = f"{form.title}_responses.xlsx"
             response = FileResponse(
                 excel_file,
                 as_attachment=True,
@@ -153,9 +160,9 @@ class ExportFormResponsesExcel(APIView):
                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
             return response
-        except Form.DoesNotExist:
-            return Response({"error": "Something wrong maybe check your form id"}, status=status.HTTP_404_NOT_FOUND)
-    
+
+        except Exception:
+            return Response({"error": "Something went wrong while exporting responses."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
@@ -163,7 +170,7 @@ class ExcelDownloadDetails(APIView):
     
     def get(self, request, form_id):
         form = get_object_or_404(Form, id=form_id)
-        url=f"http://127.0.0.1:8000/api/form/export-responses/{form_id}/"
+        url=f"{settings.BACKEND_URL}/api/form/export-responses/{form_id}/"
         return Response({
             "form_title": form.title,
             'url': url})
