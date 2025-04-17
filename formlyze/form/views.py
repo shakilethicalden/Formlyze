@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework.response import Response
+from django.http import FileResponse
+from .utils.export_excel import generate_excel
 
 def is_valid_email(email):
     try:
@@ -191,11 +193,21 @@ class FormResponseView(viewsets.ModelViewSet):
             
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
-
-
-
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
+    
+    @action(detail=True, methods=['get'], url_path='export')
+    def export_responses(self, request, pk=None):
+        form = get_object_or_404(Form, pk=pk)
+        responses = self.get_queryset().filter(form=form)
+        
+        excel_file = generate_excel(form, responses)
+        
+        response = HttpResponse(
+            excel_file,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{form.title}_responses.xlsx"'
+        return response
 
 
 def form_details(request, unique_token):
@@ -207,5 +219,44 @@ def form_details(request, unique_token):
         
         
         
+        
+class ExportFormResponsesExcel(APIView):
+    def get(self, request, form_id):
+        try:
+  
+            try:
+                form = Form.objects.get(id=form_id)
+            except Form.DoesNotExist:
+                return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
 
+            # Get form responses
+            form_responses = FormResponse.objects.filter(form_id=form_id)
+
+            # Generate the Excel file
+            excel_file = generate_excel(form_responses)
+            if not excel_file:
+                return Response({"error": "Failed to generate Excel file."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            filename = f"{form.title}_responses.xlsx"
+            response = FileResponse(
+                excel_file,
+                as_attachment=True,
+                filename=filename,
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            return response
+
+        except Exception:
+            return Response({"error": "Something went wrong while exporting responses."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+class ExcelDownloadDetails(APIView):
+    
+    def get(self, request, form_id):
+        form = get_object_or_404(Form, id=form_id)
+        url=f"{settings.BACKEND_URL}/api/form/export-responses/{form_id}/"
+        return Response({
+            "form_title": form.title,
+            'url': url})
             
