@@ -209,55 +209,12 @@ class FormResponseView(viewsets.ModelViewSet):
         )
         response['Content-Disposition'] = f'attachment; filename="{form.title}_responses.xlsx"'
         return response
-
-
+        
+        
+        
+        
 def form_details(request, unique_token):
     form = get_object_or_404(Form, unique_token=unique_token)
     fields = form.fields  
 
     return JsonResponse({'id': form.id, 'form_name': form.title, 'fields': fields}) #return json response just form name and fields
-        
-        
-        
-        
-        
-class ExportFormResponsesExcel(APIView):
-    def get(self, request, form_id):
-        try:
-  
-            try:
-                form = Form.objects.get(id=form_id)
-            except Form.DoesNotExist:
-                return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
-
-            # Get form responses
-            form_responses = FormResponse.objects.filter(form_id=form_id)
-
-            # Generate the Excel file
-            excel_file = generate_excel(form_responses)
-            if not excel_file:
-                return Response({"error": "Failed to generate Excel file."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            filename = f"{form.title}_responses.xlsx"
-            response = FileResponse(
-                excel_file,
-                as_attachment=True,
-                filename=filename,
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-            return response
-
-        except Exception:
-            return Response({"error": "Something went wrong while exporting responses."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-
-
-class ExcelDownloadDetails(APIView):
-    
-    def get(self, request, form_id):
-        form = get_object_or_404(Form, id=form_id)
-        url=f"{settings.BACKEND_URL}/api/form/export-responses/{form_id}/"
-        return Response({
-            "form_title": form.title,
-            'url': url})
-            
