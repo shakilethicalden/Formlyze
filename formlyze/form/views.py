@@ -14,8 +14,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework.response import Response
-from django.http import FileResponse
-from .utils.export_excel import generate_excel
 
 def is_valid_email(email):
     try:
@@ -29,39 +27,114 @@ def is_valid_email(email):
 
 class FormView(viewsets.ModelViewSet):
     serializer_class=FormSerializer
-    queryset = Form.objects.all().order_by('-created_at')
+    # queryset = Form.objects.all().order_by('-created_at')
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'created_by']
     # permission_classes=[IsAuthenticated]
     
+    
+    def get_queryset(self):
+        status_filter=self.request.query_params.get('status')
+        
+        queryset=Form.objects.all().order_by('-created_at')
+        
+        if status_filter=='favorite':
+            return queryset.filter(is_favorite=True, is_trash=False)
+        elif status_filter=='archive':
+            return queryset.filter(is_archive=True, is_trash=False)
+        elif status_filter=='trash':
+            return queryset.filter(is_trash=True)
+        else:
+            return queryset
+        
     
     def create(self, request, *args, **kwargs):
         serializer= self.get_serializer(data=request.data)
         if serializer.is_valid():
             form=serializer.save()
             
-            subject= "Form Creation Confirmation"
-            recipient_email=form.created_by.email
-            sender_email=settings.EMAIL_HOST_USER
-            
-            html_content= render_to_string("form_creation.html",{
-                'form':form,
-                'username':form.created_by.username
-                
-            })
-            
-            email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
-            email.attach_alternative(html_content, "text/html")
-            email.send()
-            
-                        
-            
+            try:
+                subject= "Form Creation Confirmation"
+                recipient_email=form.created_by.email
+                sender_email=settings.EMAIL_HOST_USER
+
+                html_content= render_to_string("form_creation.html",{
+                    'form':form,
+                    'username':form.created_by.username
+
+                })
+
+                email= EmailMultiAlternatives(subject, "" , sender_email, [recipient_email])
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+            except Exception as e:
+                return Response({
+                'success': True,
+                'form_link': form.get_form_link(),
+                'message': 'Email not send But Form created successfully', }, status=status.HTTP_201_CREATED)        
+
             return Response({
                 'success': True,
                 'form_link': form.get_form_link(),
                 'message': 'Form created successfully', }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
            
+
+class ToggleFavoriteView(APIView):
+    def post(self,request,pk):
+        try:
+            form=Form.objects.get(pk=pk)
+            form.is_favorite = not form.is_favorite
+            form.save()
+            return Response({
+                'success': True,
+                'message': 'Form favorite successfully' if form.is_favorite else 'Form unfavorite successfully',
+            }, status=status.HTTP_200_OK)
+        except Form.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Form not found',
+            }, status=status.HTTP_404_NOT_FOUND) 
+            
+            
+class ToggleArchiveView(APIView):
+    def post(self,request,pk):
+        try:
+            
+            form= Form.objects.get(pk=pk)
+            form.is_archive=not form.is_archive
+            form.save()
+            return Response({
+                'success':True,
+                'message':"Form Archive successfully" if form.is_archive else 'Form unarchive Successfully'
+            })
+            
+        except Form.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Form not found',
+            }, status=status.HTTP_404_NOT_FOUND) 
+         
+            
+            
+class ToggleTrashView(APIView):
+    def post(self,request,pk):
+        try:
+            form= Form.objects.get(pk=pk)
+            form.is_trash=not form.is_trash
+            form.save()
+            
+            return Response({
+                'success':True,
+                'message':"Form Trashed successfully" if form.is_trash else 'Form untrashed Successfully'
+            })
+        except Form.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Form not found',
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
     
 class FormResponseView(viewsets.ModelViewSet):
     serializer_class=FormResponseSerializer
@@ -134,44 +207,5 @@ def form_details(request, unique_token):
         
         
         
-        
-class ExportFormResponsesExcel(APIView):
-    def get(self, request, form_id):
-        try:
-  
-            try:
-                form = Form.objects.get(id=form_id)
-            except Form.DoesNotExist:
-                return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Get form responses
-            form_responses = FormResponse.objects.filter(form_id=form_id)
-
-            # Generate the Excel file
-            excel_file = generate_excel(form_responses)
-            if not excel_file:
-                return Response({"error": "Failed to generate Excel file."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            filename = f"{form.title}_responses.xlsx"
-            response = FileResponse(
-                excel_file,
-                as_attachment=True,
-                filename=filename,
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-            return response
-
-        except Exception:
-            return Response({"error": "Something went wrong while exporting responses."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-
-
-class ExcelDownloadDetails(APIView):
-    
-    def get(self, request, form_id):
-        form = get_object_or_404(Form, id=form_id)
-        url=f"{settings.BACKEND_URL}/api/form/export-responses/{form_id}/"
-        return Response({
-            "form_title": form.title,
-            'url': url})
             

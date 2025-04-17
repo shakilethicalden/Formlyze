@@ -13,6 +13,11 @@ class Form(models.Model):
     image=models.ImageField(upload_to='images/',blank=True,null=True)
     fields=models.JSONField() # it will be store data dynamically 
     is_active=models.BooleanField(default=True)
+    
+    is_favorite=models.BooleanField(default=False, null=True, blank=True)
+    is_archive=models.BooleanField(default=False, null=True, blank=True)
+    is_trash=models.BooleanField(default=False, null=True, blank=True)
+    
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     """ generate unique token for form we will use it to make unique link"""
