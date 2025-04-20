@@ -16,5 +16,5 @@ urlpatterns = [
      path('toggle-trash/<int:pk>', ToggleTrashView.as_view(), name='toggle_trash'),
     
 
-    
+     
 ]
