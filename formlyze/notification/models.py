@@ -1,7 +1,8 @@
 from django.db import models
-from form.models import Form
+from users.models import UserProfile
 # Create your models here.
 class NotificationModel(models.Model):
+    user=models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     user_email=models.EmailField(null=True, blank=True)
     message=models.TextField(null=True,blank=True)
     created_at=models.DateTimeField(auto_now_add=True)

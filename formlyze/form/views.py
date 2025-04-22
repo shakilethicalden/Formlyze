@@ -156,6 +156,7 @@ class FormResponseView(viewsets.ModelViewSet):
             #make notification and save to database
             notification_msg=f'The form "{data.form.title}" is submitted by {data.responder_email} '
             notification= NotificationModel.objects.create(
+                user=data.form.created_by,
                 user_email=data.responder_email,
                 message=notification_msg
             )
