@@ -199,6 +199,7 @@ class FormResponseView(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='export')
     def export_responses(self, request, pk=None):
         form = get_object_or_404(Form, pk=pk)
+        print('form', form)
         responses = self.get_queryset().filter(form=form)
         
         excel_file = generate_excel(form, responses)
@@ -217,4 +218,14 @@ def form_details(request, unique_token):
     form = get_object_or_404(Form, unique_token=unique_token)
     fields = form.fields  
 
-    return JsonResponse({'id': form.id, 'form_name': form.title, 'fields': fields}) #return json response just form name and fields
+    return JsonResponse({
+        'id': form.id,
+        'logo': form.logo.url if form.logo else None,
+        'url': form.website_url,
+        'favorite': form.is_favorite,
+        'archive': form.is_archive,
+        'trash': form.is_trash,
+        'form_name': form.title,
+        'description': form.description,
+        'fields': fields,
+    })
