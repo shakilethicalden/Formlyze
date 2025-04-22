@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/form/', include('form.urls')),
     path('api/users/', include('users.urls')),
     path("api/", include('google_login.urls')),
+    path("api/",include('notification.urls')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
 ]
 

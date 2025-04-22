@@ -17,7 +17,7 @@ from django.core.validators import validate_email
 from rest_framework.response import Response
 from django.http import FileResponse
 from .utils.export_excel import generate_excel
-
+from notification.models import NotificationModel
 def is_valid_email(email):
     try:
         validate_email(email)
@@ -153,6 +153,12 @@ class FormResponseView(viewsets.ModelViewSet):
         if serializer.is_valid():
             data=serializer.save()
             
+            #make notification and save to database
+            notification_msg=f'The form "{data.form.title}" is submitted by {data.responder_email} '
+            notification= NotificationModel.objects.create(
+                user_email=data.responder_email,
+                message=notification_msg
+            )
             response_url=f"{settings.FRONTEND_URL}/view-single-response/{data.id}"
             subject= "From Submission Confirmation"
             creator_email=data.form.created_by.email

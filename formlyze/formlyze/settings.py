@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'form',
     'users',
     'google_login',
+    'notification',
     
     #swagger app
     'drf_yasg',
