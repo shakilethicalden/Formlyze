@@ -218,4 +218,14 @@ def form_details(request, unique_token):
     form = get_object_or_404(Form, unique_token=unique_token)
     fields = form.fields  
 
-    return JsonResponse({'id': form.id, 'favorite': form.is_favorite, 'archive': form.is_archive, 'trash': form.is_trash,  'form_name': form.title, 'description':form.description, 'fields': fields}) #return json response just form name and fields
+    return JsonResponse({
+        'id': form.id,
+        'logo': form.logo.url if form.logo else None,
+        'url': form.website_url,
+        'favorite': form.is_favorite,
+        'archive': form.is_archive,
+        'trash': form.is_trash,
+        'form_name': form.title,
+        'description': form.description,
+        'fields': fields,
+    })

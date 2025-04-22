@@ -6,6 +6,7 @@ from .models import Form, FormResponse
 class FormSerializer(serializers.ModelSerializer):
     creator_name=serializers.SerializerMethodField() #we can retrieve username
     form_link = serializers.SerializerMethodField()
+    logo=serializers.ImageField(use_url=True,required=False)
     class Meta:
         model = Form
         fields = '__all__'
