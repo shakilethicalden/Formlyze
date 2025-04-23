@@ -155,6 +155,7 @@ WSGI_APPLICATION = 'formlyze.wsgi.application'
 #     }
 # }
 
+#-------database for local machine
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -165,6 +166,18 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
+
+#-------database for server side
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.getenv('SERVER_DB_NAME'),
+#         'USER': os.getenv('SERVER_DB_USER'),
+#         'PASSWORD': os.getenv('SERVER_DB_PASSWORD'),
+#         'HOST': os.getenv('SERVER_DB_HOST'),
+#         'PORT': os.getenv('SERVER_DB_PORT', '3306'),
+#     }
+# }
 
 
 
