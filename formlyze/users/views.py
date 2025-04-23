@@ -63,7 +63,10 @@ class RegisterView(APIView):
                     "error": str(e)
                 }, status=status.HTTP_400_BAD_REQUEST)
                 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'success': False,
+            "message": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -83,14 +86,15 @@ class LoginView(APIView):
             try:
                 profile = UserProfile.objects.get(email=username_or_email)
             except UserProfile.DoesNotExist:
-                return Response({'error': 'Invalid email', 'success': False},
+                return Response({
+                    'success': False,'message': 'Invalid email', },
                                 status=status.HTTP_401_UNAUTHORIZED)
         else:
    
             try:
                 profile = UserProfile.objects.get(username=username_or_email)
             except UserProfile.DoesNotExist:
-                return Response({'error': 'Invalid username', 'success': False},
+                return Response({'success': False,'message': 'Invalid username', },
                                 status=status.HTTP_401_UNAUTHORIZED)
 
  
@@ -106,7 +110,8 @@ class LoginView(APIView):
                 'token': token.key
             })
 
-        return Response({'error': 'Invalid credentials', 'success': False},
+        return Response({'success': False,
+                         'message': 'Invalid credentials', },
                         status=status.HTTP_401_UNAUTHORIZED)
 
 

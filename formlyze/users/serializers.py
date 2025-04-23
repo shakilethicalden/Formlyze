@@ -14,11 +14,31 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['username', 'email', 'password', 'healthCareName', 'address', 'phone']
+        
+    def validate(self, attrs):
+        username = attrs.get('username')
+        email = attrs.get('email')
+
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({'username': 'This username is already taken.'})
+
+        if UserProfile.objects.filter(user__username=username).exists():
+            raise serializers.ValidationError({'username': 'This username is already used in a profile.'})
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({'email': 'This email is already registered.'})
+
+        if UserProfile.objects.filter(user__email=email).exists():
+            raise serializers.ValidationError({'email': 'This email is already used in a profile.'})
+
+        return attrs
 
     def create(self, validated_data):
         username = validated_data.pop('username')
         email = validated_data.pop('email')
         password = validated_data.pop('password')
+        
         
         #create user
         user = User.objects.create_user(username=username, email=email, password=password)
