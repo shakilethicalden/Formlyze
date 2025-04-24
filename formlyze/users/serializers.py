@@ -51,4 +51,19 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     
     
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class ResetpasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
     
+    def validate(self, data):
+        
+        if data['password']!=data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
+        
