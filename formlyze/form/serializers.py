@@ -7,6 +7,9 @@ class FormSerializer(serializers.ModelSerializer):
     creator_name=serializers.SerializerMethodField() #we can retrieve username
     form_link = serializers.SerializerMethodField()
     logo=serializers.ImageField(use_url=True,required=False)
+    is_favorite=serializers.BooleanField(required=False)
+    is_archive=serializers.BooleanField(required=False)
+    is_trash=serializers.BooleanField(required=False)
     class Meta:
         model = Form
         fields = '__all__'

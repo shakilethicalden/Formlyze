@@ -3,7 +3,7 @@ import django
 from django.contrib.auth import get_user_model
 
 # Set up Django settings
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "formalyze.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "formlyze.settings")
 django.setup()
 
 

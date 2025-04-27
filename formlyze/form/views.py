@@ -17,7 +17,8 @@ from django.core.validators import validate_email
 from rest_framework.response import Response
 from django.http import FileResponse
 from .utils.export_excel import generate_excel
-
+from notification.models import NotificationModel
+from django.contrib.sites.shortcuts import get_current_site
 def is_valid_email(email):
     try:
         validate_email(email)
@@ -30,26 +31,13 @@ def is_valid_email(email):
 
 class FormView(viewsets.ModelViewSet):
     serializer_class=FormSerializer
-    # queryset = Form.objects.all().order_by('-created_at')
+  
+    queryset = Form.objects.all().order_by('-created_at')
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['title', 'created_by']
+    filterset_fields = ['title', 'created_by', 'is_favorite', 'is_archive', 'is_trash']
     # permission_classes=[IsAuthenticated]
     
     
-    def get_queryset(self):
-        status_filter=self.request.query_params.get('status')
-        
-        queryset=Form.objects.all().order_by('-created_at')
-        
-        if status_filter=='favorite':
-            return queryset.filter(is_favorite=True, is_trash=False)
-        elif status_filter=='archive':
-            return queryset.filter(is_archive=True, is_trash=False)
-        elif status_filter=='trash':
-            return queryset.filter(is_trash=True)
-        else:
-            return queryset
-        
     
     def create(self, request, *args, **kwargs):
         serializer= self.get_serializer(data=request.data)
@@ -153,6 +141,13 @@ class FormResponseView(viewsets.ModelViewSet):
         if serializer.is_valid():
             data=serializer.save()
             
+            #make notification and save to database
+            notification_msg=f'The form "{data.form.title}" is submitted by {data.responder_email} '
+            notification= NotificationModel.objects.create(
+                user=data.form.created_by,
+                user_email=data.responder_email,
+                message=notification_msg
+            )
             response_url=f"{settings.FRONTEND_URL}/view-single-response/{data.id}"
             subject= "From Submission Confirmation"
             creator_email=data.form.created_by.email

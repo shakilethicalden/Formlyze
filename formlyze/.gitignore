@@ -60,3 +60,7 @@ images/
 
 *.pdf
 frontend/
+
+
+# Production environment files
+.env.production
