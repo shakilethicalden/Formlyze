@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-FRONTEND_URL = 'https://formlyze.vercel.app'
+FRONTEND_URL = 'http://app.formlyze.io'
 BACKEND_URL = 'https://formlyze.mrshakil.com'
 
 
@@ -77,7 +77,8 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://formlyze.vercel.app"
+    "https://formlyze.vercel.app",
+    'http://app.formlyze.io',
 
 ]
 CORS_ALLOW_METHODS = [
@@ -96,7 +97,8 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",              
-    "https://formlyze.vercel.app",     
+    "https://formlyze.vercel.app",   
+    'http://app.formlyze.io',  
 ]
 
 
